@@ -305,10 +305,12 @@ export const switchToTestNetwork = async (networkName: string): Promise<boolean>
 };
 
 // Buy stock with ETH
+// Update buyStock function to use the smart contract
 export const buyStock = async (
   stockId: string, 
   shares: number, 
-  pricePerShare: number
+  pricePerShare: number,
+  isYes: boolean = true
 ): Promise<boolean> => {
   try {
     if (!isMetaMaskInstalled()) {
@@ -331,53 +333,46 @@ export const buyStock = async (
       return false;
     }
     
-    // Convert ETH to Wei for the transaction
-    const totalCostWei = `0x${Math.floor(totalCost * 1e18).toString(16)}`;
+    // Convert stockId to a number (assuming it's in format "market-X")
+    const marketId = parseInt(stockId.replace('market-', ''));
     
-    // In a real app, this would be the contract address
-    const marketContractAddress = "0x0000000000000000000000000000000000000000";
+    // Get contract instance
+    const contract = await getPredictionMarketContract();
+    
+    // Convert ETH to Wei for the transaction
+    const totalCostWei = ethers.utils.parseEther(totalCost.toString());
     
     // Request transaction approval from user
     toast.info("Please confirm the transaction in MetaMask...");
     
-    // Send transaction
-    const transactionHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [{
-        from: walletInfo.address,
-        to: marketContractAddress,
-        value: totalCostWei,
-        // In a real app, you would include contract method data here
-        data: `0x`, // Placeholder for contract interaction
-      }],
-    });
-    
-    // For demo purposes, we'll simulate a successful transaction
-    // In a real app, you would wait for transaction confirmation
-    
-    // Update local storage with purchase info
-    const purchases = JSON.parse(localStorage.getItem('stock_purchases') || '[]');
-    purchases.push({
-      id: Date.now(),
-      stockId,
+    // Call the contract method
+    const tx = await contract.buyShares(
+      marketId,
+      isYes, // true for YES, false for NO
       shares,
-      pricePerShare,
-      totalCost,
-      transactionHash,
-      timestamp: Date.now(),
-      status: 'completed'
-    });
-    localStorage.setItem('stock_purchases', JSON.stringify(purchases));
+      { value: totalCostWei }
+    );
     
-    // Update wallet balance (in a real app this would happen automatically)
-    const updatedWallet = {
-      ...walletInfo,
-      balance: walletInfo.balance - totalCost
-    };
-    localStorage.setItem('wallet', JSON.stringify(updatedWallet));
+    // Wait for transaction confirmation
+    toast.info("Transaction submitted. Waiting for confirmation...");
+    const receipt = await tx.wait();
     
-    toast.success(`Successfully purchased ${shares} shares for ${totalCost.toFixed(4)} ETH`);
-    return true;
+    // Check if transaction was successful
+    if (receipt.status === 1) {
+      toast.success(`Successfully purchased ${shares} shares for ${totalCost.toFixed(4)} ETH`);
+      
+      // Update local wallet balance (this will be refreshed on next connect)
+      const updatedWallet = {
+        ...walletInfo,
+        balance: walletInfo.balance - totalCost
+      };
+      localStorage.setItem('wallet', JSON.stringify(updatedWallet));
+      
+      return true;
+    } else {
+      toast.error("Transaction failed.");
+      return false;
+    }
   } catch (error) {
     console.error("Error buying stock:", error);
     toast.error("Transaction failed. Please try again.");
@@ -385,11 +380,12 @@ export const buyStock = async (
   }
 };
 
-// Sell stock for ETH
+// Update sellStock function to use the smart contract
 export const sellStock = async (
   stockId: string, 
   shares: number, 
-  pricePerShare: number
+  pricePerShare: number,
+  isYes: boolean = true
 ): Promise<boolean> => {
   try {
     if (!isMetaMaskInstalled()) {
@@ -403,67 +399,85 @@ export const sellStock = async (
       return false;
     }
     
-    // Calculate total value in ETH
-    const totalValue = shares * pricePerShare;
+    // Convert stockId to a number (assuming it's in format "market-X")
+    const marketId = parseInt(stockId.replace('market-', ''));
     
-    // Check if user owns the shares
-    const purchases = JSON.parse(localStorage.getItem('stock_purchases') || '[]');
-    const ownedShares = purchases
-      .filter((p: any) => p.stockId === stockId && p.status === 'completed')
-      .reduce((total: number, p: any) => total + p.shares, 0);
+    // Get contract instance
+    const contract = await getPredictionMarketContract();
     
-    if (ownedShares < shares) {
-      toast.error(`You don't own enough shares. You currently have ${ownedShares} shares.`);
+    // Check if user owns enough shares
+    try {
+      const userShares = await contract.getUserShares(walletInfo.address, marketId);
+      if (userShares.lt(shares)) {
+        toast.error(`You don't own enough shares. You currently have ${userShares.toString()} shares.`);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking user shares:", error);
+      toast.error("Could not verify your share balance.");
       return false;
     }
-    
-    // In a real app, this would be the contract address
-    const marketContractAddress = "0x0000000000000000000000000000000000000000";
     
     // Request transaction approval from user
     toast.info("Please confirm the transaction in MetaMask...");
     
-    // Send transaction (in a real app, this would call a contract method)
-    const transactionHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [{
-        from: walletInfo.address,
-        to: marketContractAddress,
-        // In a real app, you would include contract method data here
-        data: `0x`, // Placeholder for contract interaction
-      }],
-    });
+    // Call the contract method
+    const tx = await contract.sellShares(
+      marketId,
+      isYes, // true for YES, false for NO
+      shares
+    );
     
-    // For demo purposes, we'll simulate a successful transaction
-    // In a real app, you would wait for transaction confirmation
+    // Wait for transaction confirmation
+    toast.info("Transaction submitted. Waiting for confirmation...");
+    const receipt = await tx.wait();
     
-    // Update local storage with sale info
-    const sales = JSON.parse(localStorage.getItem('stock_sales') || '[]');
-    sales.push({
-      id: Date.now(),
-      stockId,
-      shares,
-      pricePerShare,
-      totalValue,
-      transactionHash,
-      timestamp: Date.now(),
-      status: 'completed'
-    });
-    localStorage.setItem('stock_sales', JSON.stringify(sales));
+    // Calculate total value in ETH
+    const totalValue = shares * pricePerShare;
     
-    // Update wallet balance (in a real app this would happen automatically)
-    const updatedWallet = {
-      ...walletInfo,
-      balance: walletInfo.balance + totalValue
-    };
-    localStorage.setItem('wallet', JSON.stringify(updatedWallet));
-    
-    toast.success(`Successfully sold ${shares} shares for ${totalValue.toFixed(4)} ETH`);
-    return true;
+    // Check if transaction was successful
+    if (receipt.status === 1) {
+      toast.success(`Successfully sold ${shares} shares for ${totalValue.toFixed(4)} ETH`);
+      
+      // Update local wallet balance (this will be refreshed on next connect)
+      const updatedWallet = {
+        ...walletInfo,
+        balance: walletInfo.balance + totalValue
+      };
+      localStorage.setItem('wallet', JSON.stringify(updatedWallet));
+      
+      return true;
+    } else {
+      toast.error("Transaction failed.");
+      return false;
+    }
   } catch (error) {
     console.error("Error selling stock:", error);
     toast.error("Transaction failed. Please try again.");
     return false;
+  }
+};
+
+// Add a function to get real market data from the blockchain
+export const getMarketDataFromChain = async (marketId: number): Promise<any> => {
+  try {
+    const contract = await getPredictionMarketContract();
+    
+    // Get market price (assuming the contract returns price in wei)
+    const priceWei = await contract.getMarketPrice(marketId);
+    const price = parseFloat(ethers.utils.formatEther(priceWei));
+    
+    // Get market liquidity
+    const liquidityWei = await contract.getMarketLiquidity(marketId);
+    const liquidity = parseFloat(ethers.utils.formatEther(liquidityWei));
+    
+    return {
+      price,
+      liquidity
+    };
+  } catch (error) {
+    console.error("Error getting market data from chain:", error);
+    return null;
   }
 };
 
@@ -497,3 +511,7 @@ export const getUserPortfolio = () => {
   // Convert to array and filter out zero positions
   return Object.values(portfolio).filter(position => position.shares > 0);
 };
+
+// Add these imports at the top of the file
+import { ethers } from 'ethers';
+import { getPredictionMarketContract } from './contracts/PredictionMarket';

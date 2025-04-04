@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Market } from '@/services/marketData';
 import { toast } from 'sonner';
 import { AlertTriangle } from 'lucide-react';
+import { buyStock, sellStock } from '@/services/walletService';
 
 interface TradeFormProps {
   market: Market;
@@ -50,7 +51,8 @@ const TradeForm: React.FC<TradeFormProps> = ({
   };
   
   // Handle trade submission
-  const handleTrade = () => {
+  // Update handleTrade function
+  const handleTrade = async () => {
     if (!walletConnected) {
       onConnectWallet();
       return;
@@ -63,12 +65,26 @@ const TradeForm: React.FC<TradeFormProps> = ({
       return;
     }
     
-    toast.success(
-      `Order submitted: ${tradeType === 'yes' ? 'BUY YES' : 'BUY NO'} ${calculateShares().toFixed(2)} shares for $${amount}`
-    );
+    // Show loading state
+    toast.info(`Preparing your ${tradeType === 'yes' ? 'YES' : 'NO'} order...`);
     
-    // Reset form
-    setAmount('100');
+    try {
+      // Call the real blockchain function
+      const success = await buyStock(
+        market.id,
+        calculateShares(),
+        tradeType === 'yes' ? market.yesPrice : market.noPrice,
+        tradeType === 'yes'
+      );
+      
+      if (success) {
+        // Reset form on success
+        setAmount('100');
+      }
+    } catch (error) {
+      console.error("Trade error:", error);
+      toast.error("An error occurred while processing your trade");
+    }
   };
   
   const shares = calculateShares();

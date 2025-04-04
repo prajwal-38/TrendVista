@@ -1,17 +1,21 @@
-## What technologies are used for this project?
+# Proba Trend Vista - Decentralized Prediction Market
 
-This project is built with:
+A next-generation decentralized prediction market that empowers individuals to trade insights on future events with unmatched transparency and efficiency.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Features
 
-Frontend UI
-![image](https://github.com/user-attachments/assets/8e3efb4a-e517-4a53-8e4c-17760d720758)
-![image](https://github.com/user-attachments/assets/1cd79487-f25e-4a54-9324-d7504689fd1d)
+- Connect with MetaMask wallet
+- Browse prediction markets
+- Trade YES/NO positions
+- View order book and market depth
+- Track portfolio performance
 
-positions contains temporary data
-![image](https://github.com/user-attachments/assets/be2757d0-0fb1-4dce-ac6b-5b8355d26673)
+## Quick Start
 
+```sh
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
