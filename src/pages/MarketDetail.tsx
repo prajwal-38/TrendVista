@@ -45,16 +45,15 @@ const MarketDetail = () => {
   const [walletInfo, setWalletInfo] = useState(getWalletInfo());
   const [userPosition, setUserPosition] = useState({ shares: 0 });
   
+  // Remove the nested useEffect
   useEffect(() => {
     // Add a console log to debug market data
-    useEffect(() => {
-      if (market) {
-        console.log('Market data:', market);
-        // Generate price history and order book
-        setPriceHistory(generatePriceHistory(60, 0.03, market.yesPrice));
-        setOrderBook(generateOrderBook(market.yesPrice));
-      }
-    }, [market]);
+    if (market) {
+      console.log('Market data:', market);
+      // Generate price history and order book
+      setPriceHistory(generatePriceHistory(60, 0.03, market.yesPrice));
+      setOrderBook(generateOrderBook(market.yesPrice));
+    }
   }, [market]);
   
   // Load user position
