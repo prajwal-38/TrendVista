@@ -96,6 +96,7 @@ const MarketDetail = () => {
       setOrderBook(generateOrderBook(market.yesPrice));
       
       // No interval setup - data remains static
+
     }
   }, [market]);
   

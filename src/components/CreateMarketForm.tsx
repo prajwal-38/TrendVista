@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -41,6 +42,7 @@ const CreateMarketForm: React.FC<CreateMarketFormProps> = ({
       return;
     }
     
+    // Ensure resolution date is in the future
     if (resolutionDate < new Date()) {
       toast.error('Resolution date must be in the future');
       return;
@@ -54,7 +56,7 @@ const CreateMarketForm: React.FC<CreateMarketFormProps> = ({
       
       if (success) {
         toast.success('Market created successfully!');
-        navigate('/'); 
+        navigate('/'); // Redirect to home page
       } else {
         toast.error('Failed to create market');
       }
