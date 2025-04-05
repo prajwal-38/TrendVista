@@ -1,6 +1,6 @@
-# Proba Trend Vista: Prediction Market Platform Guide
+# Trend Vista: Prediction Market Platform Guide
 
-Welcome to Proba Trend Vista, a decentralized prediction market platform! This guide will help you understand the project structure, set it up, and run it locally, even if you're new to blockchain technology.
+Welcome to Trend Vista, a decentralized prediction market platform! This guide will help you understand the project structure, set it up, and run it locally, even if you're new to blockchain technology.
 
 ## What is This Project?
 
@@ -26,7 +26,7 @@ Before you start, make sure you have:
 
 Open a terminal/command prompt in the project directory and run:
 
-npm install
+npm install --legacy-peer-deps
 
 
 This will install all the required packages for the project.
