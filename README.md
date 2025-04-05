@@ -2,7 +2,7 @@
 
 A next-generation decentralized prediction market that empowers individuals to trade insights on future events with unmatched transparency and efficiency.
 
-## Features
+## Features functionality
 
 - Connect with MetaMask wallet
 - Browse prediction markets
@@ -47,7 +47,7 @@ Before you start, make sure you have:
 
 Open a terminal/command prompt in the project directory and run:
 
-npm install
+npm install --legacy-peer-deps
 
 
 This will install all the required packages for the project.
@@ -83,7 +83,7 @@ This will:
 
 In another terminal window, start the development server:
 
-npm tun dev 
+npm run dev 
 
 
 This will start the web application, typically at http://localhost:5173
