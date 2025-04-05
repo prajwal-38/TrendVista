@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -12,7 +12,8 @@ import {
   DollarSign,
   Percent,
   BarChart,
-  Trophy
+  Trophy,
+  Wallet
 } from 'lucide-react';
 import MarketCard from '@/components/MarketCard';
 import { mockMarkets } from '@/services/marketData';
@@ -24,7 +25,7 @@ const Index = () => {
   const [walletInfo, setWalletInfo] = React.useState(getWalletInfo());
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Connect wallet function
+
   const handleConnectWallet = async () => {
     const connected = await connectWallet();
     if (connected) {
@@ -32,25 +33,24 @@ const Index = () => {
     }
   };
   
-  // Disconnect wallet function
+
   const handleDisconnectWallet = () => {
     disconnectWallet();
     setWalletInfo(null);
   };
   
-  // Filter markets
+
   const trendingMarkets = mockMarkets.filter(market => market.isTrending);
   const popularMarkets = mockMarkets.filter(market => market.isPopular);
   
-  // Handle search
+ 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
-  
-  // Get the most volumed market
+
   const mostVolumedMarket = [...mockMarkets].sort((a, b) => b.volume - a.volume)[0];
   
   return (

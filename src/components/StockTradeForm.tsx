@@ -26,25 +26,22 @@ const StockTradeForm: React.FC<StockTradeFormProps> = ({
   const [walletBalance, setWalletBalance] = useState(0);
   const [ownedShares, setOwnedShares] = useState(0);
   
-  // Calculate total cost/value
   const sharesNum = parseFloat(shares) || 0;
   const totalAmount = sharesNum * currentPrice;
   
-  // Load wallet balance and owned shares
   useEffect(() => {
     const wallet = getWalletInfo();
     if (wallet) {
       setWalletBalance(wallet.balance);
     }
-    
-    // Get owned shares for this stock
+
     const portfolio = getUserPortfolio();
     const position = portfolio.find(p => p.stockId === stockId);
     setOwnedShares(position ? position.shares : 0);
   }, [stockId]);
   
   const handleSharesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Allow only numbers and decimal point
+  
     const value = e.target.value.replace(/[^0-9.]/g, '');
     setShares(value);
   };

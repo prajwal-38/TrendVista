@@ -25,33 +25,28 @@ const TradeForm: React.FC<TradeFormProps> = ({
   const [amount, setAmount] = useState<string>('100');
   const [slippage, setSlippage] = useState<number>(2);
   
-  // Calculate estimated shares
+
   const calculateShares = () => {
     const amountNum = parseFloat(amount) || 0;
     const price = tradeType === 'yes' ? market.yesPrice : market.noPrice;
     return amountNum / price;
   };
-  
-  // Format currency
+
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
   };
-  
-  // Handle amount change
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Only allow numbers and decimals
+
     if (/^$|^[0-9]+\.?[0-9]*$/.test(value)) {
       setAmount(value);
     }
   };
-  
-  // Handle trade submission
-  // Update handleTrade function
+
   const handleTrade = async () => {
     if (!walletConnected) {
       onConnectWallet();
@@ -65,11 +60,9 @@ const TradeForm: React.FC<TradeFormProps> = ({
       return;
     }
     
-    // Show loading state
     toast.info(`Preparing your ${tradeType === 'yes' ? 'YES' : 'NO'} order...`);
     
     try {
-      // Call the real blockchain function
       const success = await buyStock(
         market.id,
         calculateShares(),
@@ -78,7 +71,6 @@ const TradeForm: React.FC<TradeFormProps> = ({
       );
       
       if (success) {
-        // Reset form on success
         setAmount('100');
       }
     } catch (error) {

@@ -1,8 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import { Card, CardContent } from '@/components/ui/card';
-import { Wallet } from 'lucide-react';
+import { Wallet, TrendingUp } from 'lucide-react';
 import { WalletInfo } from '@/services/walletService';
 
 interface LayoutProps {
@@ -14,12 +15,12 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ 
   children, 
-  walletInfo,
-  onConnectWallet,
-  onDisconnectWallet
+  walletInfo, 
+  onConnectWallet, 
+  onDisconnectWallet 
 }) => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Navbar 
         walletInfo={walletInfo}
         onConnectWallet={onConnectWallet}
@@ -56,10 +57,12 @@ const Layout: React.FC<LayoutProps> = ({
               </p>
             </div>
             <div className="flex gap-6">
+              <a href="/leaderboard" className="text-muted-foreground hover:text-foreground transition-colors">Leaderboard</a>
+              <a href="/test-data" className="text-muted-foreground hover:text-foreground transition-colors">Test Data</a>
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Terms</a>
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Docs</a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a>
+              <a href="https://github.com/MRKrinetic/TrendVista" className="text-muted-foreground hover:text-foreground transition-colors">GitHub</a>
             </div>
           </div>
         </div>
