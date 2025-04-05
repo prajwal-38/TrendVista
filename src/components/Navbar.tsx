@@ -66,14 +66,14 @@ const Navbar: React.FC<NavbarProps> = ({
       <header className="border-b border-border sticky top-0 z-50 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
+      
             <Link to="/" className="flex items-center">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-info bg-clip-text text-transparent">
                 TrendVista
               </h1>
             </Link>
 
-            {/* Desktop Navigation */}
+        
             <nav className="hidden md:flex items-center space-x-6">
               <Link to="/" className="text-foreground hover:text-primary transition-colors">
                 Markets
@@ -83,6 +83,12 @@ const Navbar: React.FC<NavbarProps> = ({
               </Link>
               <Link to="/leaderboard" className="text-foreground hover:text-primary transition-colors">
                 Leaderboard
+              </Link>
+              <Link to="/created-markets" className="text-foreground hover:text-primary transition-colors">
+                Created Markets
+              </Link>
+              <Link to="/test-data" className="text-foreground hover:text-primary transition-colors">
+                Test-data
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger className="text-foreground hover:text-primary transition-colors inline-flex items-center">
@@ -103,7 +109,6 @@ const Navbar: React.FC<NavbarProps> = ({
               </DropdownMenu>
             </nav>
 
-            {/* Wallet Button / User Menu */}
             <div className="flex items-center">
               {walletInfo?.connected ? (
                 <DropdownMenu>
@@ -144,9 +149,9 @@ const Navbar: React.FC<NavbarProps> = ({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/wallet" className="cursor-pointer">
+                      <Link to="/portfolio" className="cursor-pointer">
                         <Wallet className="mr-2 h-4 w-4" />
-                        <span>Wallet Details</span>
+                        <span>MetaMask Wallet</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -172,7 +177,6 @@ const Navbar: React.FC<NavbarProps> = ({
                 </button>
               )}
 
-              {/* Mobile Menu Button */}
               <button
                 className="ml-4 p-2 md:hidden rounded-md hover:bg-secondary transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -183,7 +187,6 @@ const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border">
             <div className="container mx-auto px-4 py-4 space-y-2">
@@ -207,6 +210,13 @@ const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Leaderboard
+              </Link>
+              <Link
+                to="/created-markets"
+                className="block py-2 text-foreground hover:text-primary transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Created Markets
               </Link>
               <Link
                 to="/how-it-works"
@@ -234,7 +244,6 @@ const Navbar: React.FC<NavbarProps> = ({
         )}
       </header>
       
-      {/* MetaMask Prompt */}
       {showMetaMaskPrompt && (
         <MetaMaskPrompt onClose={() => setShowMetaMaskPrompt(false)} />
       )}

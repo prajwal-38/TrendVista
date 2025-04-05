@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
@@ -6,7 +5,8 @@ import {
   generatePriceHistory, 
   generateOrderBook,
   PricePoint,
-  OrderBook as OrderBookType
+  OrderBook as OrderBookType,
+  Market
 } from '@/services/marketData';
 import { connectWallet, disconnectWallet, getWalletInfo } from '@/services/walletService';
 import Layout from '@/components/Layout';
@@ -29,12 +29,23 @@ import {
   Share2,
   ChevronLeft,
   Info,
-  AlertTriangle
+  AlertTriangle,
+  User,
+  Plus,
+  Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import StockTradeForm from '@/components/StockTradeForm';
 import { getUserPortfolio } from '@/services/walletService';
+import MarketCard from '@/components/MarketCard';
+
+// Get user-created markets from localStorage
+const getUserCreatedMarkets = (): Market[] => {
+  const storedMarkets = localStorage.getItem('userCreatedMarkets');
+  return storedMarkets ? JSON.parse(storedMarkets) : [];
+};
 
 const MarketDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,15 +55,47 @@ const MarketDetail = () => {
   const [orderBook, setOrderBook] = useState<OrderBookType>({ bids: [], asks: [] });
   const [walletInfo, setWalletInfo] = useState(getWalletInfo());
   const [userPosition, setUserPosition] = useState({ shares: 0 });
+  const [userCreatedMarkets, setUserCreatedMarkets] = useState<Market[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredMarkets, setFilteredMarkets] = useState<Market[]>([]);
   
-  // Remove the nested useEffect
+  // Load user created markets
   useEffect(() => {
-    // Add a console log to debug market data
+    const markets = getUserCreatedMarkets();
+    console.log('User created markets:', markets);
+    setUserCreatedMarkets(markets);
+    setFilteredMarkets(markets);
+  }, []);
+  
+  // Handle search
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    
+    if (query.trim() === '') {
+      setFilteredMarkets(userCreatedMarkets);
+    } else {
+      const filtered = userCreatedMarkets.filter(market => 
+        market.title.toLowerCase().includes(query) ||
+        market.description.toLowerCase().includes(query) ||
+        market.category.toLowerCase().includes(query) ||
+        (market.tags && market.tags.some(tag => tag.toLowerCase().includes(query)))
+      );
+      setFilteredMarkets(filtered);
+    }
+  };
+  
+  // Generate price history once without continuous updates
+  useEffect(() => {
     if (market) {
       console.log('Market data:', market);
-      // Generate price history and order book
-      setPriceHistory(generatePriceHistory(60, 0.03, market.yesPrice));
+      
+      // Generate initial price history with stable values
+      const initialHistory = generatePriceHistory(60, 0.01, market.yesPrice);
+      setPriceHistory(initialHistory);
       setOrderBook(generateOrderBook(market.yesPrice));
+      
+      // No interval setup - data remains static
     }
   }, [market]);
   
@@ -65,7 +108,7 @@ const MarketDetail = () => {
     }
   }, [market]);
   
-  // Connect wallet function
+  // Wallet connection functions
   const handleConnectWallet = async () => {
     const connected = await connectWallet();
     if (connected) {
@@ -73,27 +116,23 @@ const MarketDetail = () => {
     }
   };
   
-  // Disconnect wallet function
   const handleDisconnectWallet = () => {
     disconnectWallet();
     setWalletInfo(null);
   };
   
-  // Refresh data after trade
+  // Refresh data after a trade
   const handleTradeComplete = async () => {
-    // Refresh wallet info
     const connected = await connectWallet();
     if (connected) {
       setWalletInfo(connected);
     }
-    
-    // Refresh user position
     const portfolio = getUserPortfolio();
     const position = portfolio.find(p => p.stockId === market?.id);
     setUserPosition({ shares: position ? position.shares : 0 });
   };
   
-  // Format volume with k/m suffix
+  // Format volume with suffixes
   const formatVolume = (volume: number) => {
     if (volume >= 1000000) {
       return `$${(volume / 1000000).toFixed(1)}M`;
@@ -104,13 +143,13 @@ const MarketDetail = () => {
     }
   };
 
-  // Format date
+  // Format date for display
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
   
-  // Share market
+  // Share market details
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -154,7 +193,6 @@ const MarketDetail = () => {
       onConnectWallet={handleConnectWallet}
       onDisconnectWallet={handleDisconnectWallet}
     >
-      {/* Navigation */}
       <div className="mb-6">
         <Link to="/" className="text-muted-foreground hover:text-foreground inline-flex items-center transition-colors">
           <ChevronLeft className="mr-2 h-4 w-4" />
@@ -162,7 +200,6 @@ const MarketDetail = () => {
         </Link>
       </div>
       
-      {/* Market Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
           <div>
@@ -184,7 +221,6 @@ const MarketDetail = () => {
         <p className="text-muted-foreground">{market.description}</p>
       </div>
       
-      {/* Market Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="p-4 flex flex-col">
@@ -224,7 +260,6 @@ const MarketDetail = () => {
         </Card>
       </div>
       
-      {/* Price Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <Card className="bg-success/10 border-success/20">
           <CardContent className="p-4 flex justify-between items-center">
@@ -250,7 +285,6 @@ const MarketDetail = () => {
         </Card>
       </div>
       
-      {/* Add Current Price Card */}
       <Card className="mb-8 bg-primary/10 border-primary/20">
         <CardContent className="p-4 flex justify-between items-center">
           <div>
@@ -265,7 +299,6 @@ const MarketDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Trading Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <div className="lg:col-span-2 space-y-8">
           <PriceChart data={priceHistory} title="YES Price History" />
@@ -280,7 +313,6 @@ const MarketDetail = () => {
         </div>
       </div>
       
-      {/* Resolution Rules */}
       <Card className="mb-8">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -305,7 +337,117 @@ const MarketDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Add trading section */}
+      <div className="mb-16">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            <h2 className="text-2xl font-bold">Your Created Markets</h2>
+          </div>
+          <Button variant="outline" onClick={() => navigate('/create-market')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create New Market
+          </Button>
+        </div>
+        
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search your markets by title, description, category or tags..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+        </div>
+        
+        {filteredMarkets && filteredMarkets.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMarkets.map(userMarket => (
+              <div key={userMarket.id} className="flex flex-col h-full">
+                <Card className="flex-1 mb-2">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{userMarket.title}</CardTitle>
+                    <CardDescription className="line-clamp-2">{userMarket.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-muted-foreground">Current Price:</span>
+                      <span className="font-medium">0.00 ETH</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="outline">{userMarket.category}</Badge>
+                      {userMarket.tags?.map(tag => (
+                        <Badge key={tag} variant="secondary">{tag}</Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => {
+                      if (walletInfo?.connected) {
+                        navigate(`/market/${userMarket.id}`);
+                      } else {
+                        handleConnectWallet();
+                      }
+                    }}
+                  >
+                    Buy
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => {
+                      if (walletInfo?.connected) {
+                        navigate(`/market/${userMarket.id}`);
+                      } else {
+                        handleConnectWallet();
+                      }
+                    }}
+                  >
+                    Sell
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : searchQuery ? (
+          <Card className="bg-muted/50">
+            <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Search className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">No Markets Found</h3>
+              <p className="text-muted-foreground mb-4">
+                No markets match your search for "{searchQuery}".
+              </p>
+              <Button variant="outline" onClick={() => setSearchQuery('')}>
+                Clear Search
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-muted/50">
+            <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Plus className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">No Markets Created Yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Create your first prediction market and start trading.
+              </p>
+              <Button onClick={() => navigate('/create-market')}>
+                Create Market
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+      
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-2">

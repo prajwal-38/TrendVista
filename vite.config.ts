@@ -26,7 +26,7 @@ export default defineConfig({
     },
   },
   server: {
-    host: 'localhost', // Change from specific IP to localhost
+    host: 'localhost',
     port: 3000
   },
 })

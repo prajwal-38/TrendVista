@@ -31,14 +31,12 @@ const PlaceOrderForm: React.FC<PlaceOrderFormProps> = ({
   const [ethValue, setEthValue] = useState<number>(0.01);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Update order type when selectedIsYes changes
   useEffect(() => {
     if (selectedIsYes !== undefined) {
       setOrderType(selectedIsYes ? 'yes' : 'no');
     }
   }, [selectedIsYes]);
-  
-  // Update price when selectedPrice changes
+
   useEffect(() => {
     if (selectedPrice) {
       setPrice(selectedPrice);
@@ -85,7 +83,7 @@ const PlaceOrderForm: React.FC<PlaceOrderFormProps> = ({
       
       if (success) {
         toast.success('Order placed successfully!');
-        // Reset form
+ 
         setAmount(100);
         setEthValue(0.01);
       } else {

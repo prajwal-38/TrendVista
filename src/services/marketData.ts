@@ -80,17 +80,18 @@ export const mockMarkets: Market[] = [
   },
   {
     id: "market-3",
-    title: "Will Donald Trump win the 2024 US Presidential Election?",
-    description: "This market resolves to YES if Donald Trump is elected as the President of the United States in the 2024 election.",
+    title: "Will ViKTims be invited to pitch their amazing idea in Delhi ?",
+    description: "This market resolves to YES if ViKTims win the Hackathon.",
     category: "Politics",
-    resolutionDate: "2024-11-05",
-    createdAt: "2023-10-20",
+    resolutionDate: "2025-04-05",
+    createdAt: "2025-04-04",
     volume: 540000,
     liquidity: 320000,
-    yesPrice: 0.48,
-    noPrice: 0.52,
+    yesPrice: 0.98,
+    noPrice: 0.02,
+    imageUrl: "/assets/bitcoin.png",
     isTrending: true,
-    tags: ["Politics", "USA", "Election"]
+    tags: ["Politics", "Delhi", "Hackathon"]
   },
   {
     id: "market-4",
@@ -108,16 +109,16 @@ export const mockMarkets: Market[] = [
   },
   {
     id: "market-5",
-    title: "Will global average temperature exceed 1.5°C above pre-industrial levels in 2025?",
-    description: "This market resolves to YES if the global average temperature in 2025 exceeds 1.5°C above pre-industrial levels according to NASA GISS.",
-    category: "Climate",
+    title: "Is there a chance of TrendVista getting funded by the end of 2026 ?",
+    description: "This market resolves to YES if TrendVista gets funded.",
+    category: "Social",
     resolutionDate: "2026-01-31",
     createdAt: "2023-11-30",
     volume: 76000,
     liquidity: 38000,
     yesPrice: 0.58,
     noPrice: 0.42,
-    tags: ["Climate", "Environment", "Temperature"]
+    tags: ["Social", "Funding", "Startup"]
   },
   {
     id: "market-6",
@@ -141,13 +142,19 @@ export const generatePriceHistory = (days: number, volatility: number, initialPr
   const history: PricePoint[] = [];
   let currentPrice = initialPrice;
   
-  for (let i = days; i >= 0; i--) {
+  // Use fewer data points for a smoother graph
+  const dataPoints = 10; // Reduced from using all days
+  const dayInterval = Math.max(1, Math.floor(days / dataPoints));
+  
+  for (let i = days; i >= 0; i -= dayInterval) {
     const time = now - (i * 24 * 60 * 60 * 1000);
-    const change = (Math.random() - 0.5) * volatility;
+    
+    // Reduce volatility significantly for smoother changes
+    const change = (Math.random() - 0.5) * (volatility * 0.2);
     currentPrice = Math.max(0.01, Math.min(0.99, currentPrice + change));
     
-    // Add some randomized volume
-    const volume = Math.floor(Math.random() * 10000) + 1000;
+    // Simplify volume calculation
+    const volume = 5000 + Math.floor(Math.random() * 2000);
     
     history.push({
       time,
@@ -216,7 +223,7 @@ export const generateOrderBook = (currentPrice: number): OrderBook => {
 export const mockPositions: UserPosition[] = [
   {
     marketId: "market-1",
-    marketTitle: "Will Bitcoin exceed $100,000 by the end of 2025?",
+    marketTitle: "Will ViKims win this hackathon ?",
     outcome: "YES",
     quantity: 1000,
     avgPrice: 0.56,
@@ -226,7 +233,7 @@ export const mockPositions: UserPosition[] = [
   },
   {
     marketId: "market-3",
-    marketTitle: "Will Donald Trump win the 2024 US Presidential Election?",
+    marketTitle: "Will ViKims win this hackathon ?",
     outcome: "NO",
     quantity: 500,
     avgPrice: 0.45,
@@ -245,3 +252,30 @@ export const mockPositions: UserPosition[] = [
     profitPercentage: 11.76
   }
 ];
+
+// 3. Creating Custom Price History Data
+
+
+// Add this function to create custom price history
+export const getCustomPriceHistory = (marketId: string): PricePoint[] => {
+  const now = Date.now();
+  const dayInMs = 24 * 60 * 60 * 1000;
+  
+  // Custom price history for specific markets
+  if (marketId === "market-1") {
+    return [
+      { time: now - (30 * dayInMs), price: 0.50, volume: 5000 },
+      { time: now - (25 * dayInMs), price: 0.52, volume: 6200 },
+      { time: now - (20 * dayInMs), price: 0.55, volume: 7800 },
+      { time: now - (15 * dayInMs), price: 0.58, volume: 9100 },
+      { time: now - (10 * dayInMs), price: 0.60, volume: 12000 },
+      { time: now - (5 * dayInMs), price: 0.61, volume: 15000 },
+      { time: now, price: 0.62, volume: 18000 },
+    ];
+  }
+  
+  // Add more custom histories for other markets
+  
+  // Fallback to generated history if no custom data
+  return generatePriceHistory(30, 0.01, 0.5);
+};

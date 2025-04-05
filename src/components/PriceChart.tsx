@@ -13,6 +13,7 @@ import {
   Legend,
   AreaChart,
   Area,
+  ReferenceLine,
 } from 'recharts';
 import { 
   Tabs, 
@@ -29,7 +30,6 @@ interface PriceChartProps {
 const PriceChart: React.FC<PriceChartProps> = ({ data, title = "Price History" }) => {
   const [timeRange, setTimeRange] = useState('all');
   
-  // Filter data based on selected time range
   const getFilteredData = () => {
     if (timeRange === 'all' || data.length === 0) return data;
     
@@ -64,12 +64,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, title = "Price History" }
     });
   };
   
-  // Format y-axis labels (0-1 to 0-100%)
   const formatYAxis = (value: number) => {
     return `${(value * 100).toFixed(0)}¢`;
   };
   
-  // Custom tooltip
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -91,6 +89,10 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, title = "Price History" }
   };
   
   const filteredData = getFilteredData();
+
+  const avgPrice = filteredData.length > 0 
+    ? filteredData.reduce((sum, point) => sum + point.price, 0) / filteredData.length 
+    : 0.5;
   
   return (
     <Card className="w-full">
@@ -142,6 +144,17 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, title = "Price History" }
                 tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip />} />
+              <ReferenceLine 
+                y={avgPrice} 
+                stroke="#666" 
+                strokeDasharray="3 3" 
+                label={{ 
+                  value: `Avg: ${(avgPrice * 100).toFixed(0)}¢`, 
+                  position: 'right',
+                  fill: '#666',
+                  fontSize: 10
+                }} 
+              />
               <Area 
                 type="monotone" 
                 dataKey="price" 
@@ -150,6 +163,11 @@ const PriceChart: React.FC<PriceChartProps> = ({ data, title = "Price History" }
                 fillOpacity={1}
                 fill="url(#colorPrice)"
                 activeDot={{ r: 6, fill: "#3772FF", stroke: "#fff" }}
+                isAnimationActive={true}
+                animationBegin={0}
+                animationDuration={2500}
+                animationEasing="ease"
+                connectNulls={true}
               />
             </AreaChart>
           </ResponsiveContainer>

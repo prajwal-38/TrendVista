@@ -8,7 +8,6 @@ interface OrderBookProps {
 }
 
 const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
-  // Find the max quantity to scale the depth visualization
   const maxQuantity = Math.max(
     ...orderBook.bids.map(bid => bid.total),
     ...orderBook.asks.map(ask => ask.total)
@@ -26,7 +25,7 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
           <div className="text-right">Total</div>
         </div>
         
-        {/* Asks (Sell Orders) - highest to lowest */}
+       
         <div className="mb-4 max-h-[200px] overflow-y-auto scrollbar-thin">
           {orderBook.asks.slice().reverse().map((ask, index) => (
             <div key={`ask-${index}`} className="grid grid-cols-3 gap-1 text-xs relative h-6 items-center">
@@ -43,8 +42,7 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
             </div>
           ))}
         </div>
-        
-        {/* Spread */}
+
         <div className="my-2 py-2 px-3 bg-secondary/20 rounded text-xs flex justify-between items-center">
           <span>Spread</span>
           <span className="font-medium">
@@ -58,8 +56,7 @@ const OrderBook: React.FC<OrderBookProps> = ({ orderBook }) => {
             ).toFixed(2)}%
           </span>
         </div>
-        
-        {/* Bids (Buy Orders) - highest to lowest */}
+
         <div className="max-h-[200px] overflow-y-auto scrollbar-thin">
           {orderBook.bids.map((bid, index) => (
             <div key={`bid-${index}`} className="grid grid-cols-3 gap-1 text-xs relative h-6 items-center">

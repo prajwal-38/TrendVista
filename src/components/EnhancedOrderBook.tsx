@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { OrderBook as OrderBookType } from '@/services/marketData';
 import { cancelOrder } from '@/services/contracts/PredictionMarket';
 import { toast } from 'sonner';
-import { formatAddress } from '@/lib/utils';
 
 interface EnhancedOrderBookProps {
   orderBook: OrderBookType;
@@ -20,21 +19,22 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
 }) => {
   const [view, setView] = useState<'combined' | 'depth' | 'trades'>('combined');
   
-  // Find the max quantity to scale the depth visualization
-  const maxQuantity = Math.max(
-    ...orderBook.bids.map(bid => bid.total),
-    ...orderBook.asks.map(ask => ask.total)
-  );
-  
-  // Calculate mid price
-  const midPrice = orderBook.bids.length && orderBook.asks.length
-    ? (orderBook.bids[0].price + orderBook.asks[0].price) / 2
-    : 0.5;
-  
-  // Calculate spread
-  const spread = orderBook.bids.length && orderBook.asks.length
-    ? orderBook.asks[0].price - orderBook.bids[0].price
-    : 0;
+  const { maxQuantity, midPrice, spread } = useMemo(() => {
+    if (!orderBook.bids.length || !orderBook.asks.length) {
+      return { maxQuantity: 1, midPrice: 0.5, spread: 0 };
+    }
+    
+    const maxQuantity = Math.max(
+      ...orderBook.bids.map(bid => bid.total || 0),
+      ...orderBook.asks.map(ask => ask.total || 0)
+    );
+    
+    const midPrice = (orderBook.bids[0].price + orderBook.asks[0].price) / 2;
+    
+    const spread = orderBook.asks[0].price - orderBook.bids[0].price;
+    
+    return { maxQuantity, midPrice, spread };
+  }, [orderBook]);
   
   const handleCancelOrder = async (orderId: string) => {
     toast.info('Cancelling order...');
@@ -67,13 +67,11 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
       </CardHeader>
       <CardContent className="pt-4">
         <TabsContent value="combined" className="mt-0">
-          {/* Mid price and spread */}
           <div className="bg-secondary/20 rounded-md p-2 mb-3 flex justify-between items-center text-xs">
             <span>Mid Price: <span className="font-semibold">{(midPrice * 100).toFixed(2)}¢</span></span>
             <span>Spread: <span className="font-semibold">{(spread * 100).toFixed(2)}¢ ({(spread / midPrice * 100).toFixed(2)}%)</span></span>
           </div>
           
-          {/* Column headers */}
           <div className="grid grid-cols-4 gap-1 text-xs font-semibold text-muted-foreground mb-2">
             <div>Price (¢)</div>
             <div className="text-right">Size</div>
@@ -81,12 +79,11 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
             <div className="text-right">Action</div>
           </div>
           
-          {/* Asks (Sell Orders) - highest to lowest */}
           <div className="space-y-1 mb-2">
             {orderBook.asks.slice().reverse().map((ask, i) => (
               <div 
                 key={`ask-${i}`} 
-                className="grid grid-cols-4 gap-1 text-xs items-center hover:bg-secondary/20 rounded cursor-pointer"
+                className="grid grid-cols-4 gap-1 text-xs items-center hover:bg-secondary/20 rounded cursor-pointer relative"
                 onClick={() => onOrderSelect?.(ask.price, true)}
               >
                 <div className="text-red-500 font-medium">{(ask.price * 100).toFixed(2)}</div>
@@ -100,7 +97,7 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
                       className="h-6 px-2 text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCancelOrder(ask.orderId!);
+                        handleCancelOrder(ask.orderId as string);
                       }}
                     >
                       Cancel
@@ -115,12 +112,11 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
             ))}
           </div>
           
-          {/* Bids (Buy Orders) - highest to lowest */}
           <div className="space-y-1">
             {orderBook.bids.map((bid, i) => (
               <div 
                 key={`bid-${i}`} 
-                className="grid grid-cols-4 gap-1 text-xs items-center hover:bg-secondary/20 rounded cursor-pointer"
+                className="grid grid-cols-4 gap-1 text-xs items-center hover:bg-secondary/20 rounded cursor-pointer relative"
                 onClick={() => onOrderSelect?.(bid.price, false)}
               >
                 <div className="text-green-500 font-medium">{(bid.price * 100).toFixed(2)}</div>
@@ -152,10 +148,8 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
         
         <TabsContent value="depth" className="mt-0">
           <div className="h-[300px] relative">
-            {/* This would be a depth chart visualization */}
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
               Depth chart visualization would go here
-              {/* In a real implementation, you would use a charting library like recharts or d3 */}
             </div>
           </div>
         </TabsContent>
@@ -177,4 +171,4 @@ const EnhancedOrderBook: React.FC<EnhancedOrderBookProps> = ({
   );
 };
 
-export default EnhancedOrderBook;
+export default React.memo(EnhancedOrderBook);

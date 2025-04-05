@@ -33,10 +33,10 @@ const Leaderboard = () => {
     setWalletInfo(null);
   };
   
-  // Sort markets by volume (highest first)
+  
   const sortedMarkets = [...mockMarkets].sort((a, b) => b.volume - a.volume);
   
-  // Top market by volume
+
   const topVolumeMarket = sortedMarkets[0];
   
   return (

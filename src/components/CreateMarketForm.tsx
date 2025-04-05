@@ -41,7 +41,6 @@ const CreateMarketForm: React.FC<CreateMarketFormProps> = ({
       return;
     }
     
-    // Ensure resolution date is in the future
     if (resolutionDate < new Date()) {
       toast.error('Resolution date must be in the future');
       return;
@@ -55,7 +54,7 @@ const CreateMarketForm: React.FC<CreateMarketFormProps> = ({
       
       if (success) {
         toast.success('Market created successfully!');
-        navigate('/'); // Redirect to home page
+        navigate('/'); 
       } else {
         toast.error('Failed to create market');
       }

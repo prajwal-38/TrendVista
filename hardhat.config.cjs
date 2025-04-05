@@ -1,9 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("dotenv").config();
 
-// For local testing, we don't need real private keys
-// Use a dummy private key for local testing only
-const PRIVATE_KEY = "0x0000000000000000000000000000000000000000000000000000000000000001"; 
-const SEPOLIA_RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/your-api-key";
+// Use environment variables for sensitive information
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000001"; 
+const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://eth-sepolia.g.alchemy.com/v2/your-api-key";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
