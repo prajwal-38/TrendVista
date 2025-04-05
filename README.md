@@ -2,6 +2,7 @@
 
 ![image](https://github.com/user-attachments/assets/44d78c46-d684-4879-8dd2-9439bb663789)
 
+https://trend-vista-flax.vercel.app/
 
 A next-generation decentralized prediction market that empowers individuals to trade insights on future events with unmatched transparency and efficiency.
 
