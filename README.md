@@ -1,5 +1,8 @@
 # Trend Vista - Decentralized Prediction Market
 
+![image](https://github.com/user-attachments/assets/44d78c46-d684-4879-8dd2-9439bb663789)
+
+
 A next-generation decentralized prediction market that empowers individuals to trade insights on future events with unmatched transparency and efficiency.
 
 ## Features functionality
