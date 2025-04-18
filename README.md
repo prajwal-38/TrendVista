@@ -50,9 +50,9 @@ Before you start, make sure you have:
 ### Step 1: Install Dependencies
 
 Open a terminal/command prompt in the project directory and run:
-
+```bash
 npm install --legacy-peer-deps
-
+```
 
 This will install all the required packages for the project.
 
